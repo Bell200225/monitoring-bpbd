@@ -1,1 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BPBD KOTA BINJAI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;900&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+      color: #222;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    header img {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+    }
+    h1 {
+      font-size: 2.5em;
+      font-weight: 900;
+      color: #fff;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+    }
+    h2 {
+      font-size: 1.1em;
+      font-weight: 500;
+      text-align: center;
+      max-width: 500px;
+      color: #fff4d9;
+    }
+    .container {
+      background-color: #fff7e6;
+      padding: 20px;
+      border-radius: 20px;
+      max-width: 600px;
+      width: 100%;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    label {
+      font-weight: 600;
+      margin-top: 12px;
+      display: block;
+      color: #b05e00;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+      background-color: #fff;
+    }
+    textarea {
+      resize: vertical;
+    }
+    button {
+      margin-top: 16px;
+      background: linear-gradient(to right, #f2994a, #f2c94c);
+      border: none;
+      padding: 12px;
+      width: 100%;
+      font-weight: bold;
+      color: #5d2900;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    th, td {
+      padding: 10px;
+      text-align: center;
+      border: 1px solid #ddd;
+    }
+    .summary {
+      margin-top: 20px;
+      font-size: 0.95em;
+      background: #f2c94c;
+      padding: 10px;
+      border-radius: 12px;
+      color: #5d2900;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+   <header>
+        <img src="bpbdlogo.png" alt="Logo BPBD Indonesia" />
+        <h1>BPBD KOTA BINJAI</h1>
+  </header>
+  <h2>Monitoring dan Rekapitulasi Kejadian Bencana dan Kegiatan Penanggulangan</h2>
+  <div class="container">
+    <form id="incidentForm">
+      <label for="dateInput">Tanggal Kejadian</label>
+      <input type="date" id="dateInput" required>
+      <label for="incidentSelect">Jenis Kejadian</label>
+      <select id="incidentSelect" required>
+        <option value="">Pilih jenis kejadian</option>
+        <option value="Kebakaran">Kebakaran</option>
+        <option value="Banjir">Banjir</option>
+        <option value="Gotong Royong">Gotong Royong</option>
+        <option value="Evakuasi Hewan">Evakuasi Hewan</option>
+        <option value="Evakuasi Korban">Evakuasi Korban</option>
+        <option value="Puting Beliung">Puting Beliung</option>
+        <option value="Tanah Longsor">Tanah Longsor</option>
+        <option value="Lainnya">Lainnya</option>
+      </select>
+      <label for="descriptionInput">Penjelasan Kejadian</label>
+      <textarea id="descriptionInput" maxlength="300" required></textarea>
+      <button type="submit">Tambah Kejadian</button>
+    </form>
+    <table id="incidentsTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Jenis Kejadian</th>
+          <th>Penjelasan</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <div class="summary" id="summaryArea">Belum ada data.</div>
+  </div>
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwhz0GDg8xBIWIN4yGyi8fNtAVz7LIBD4GWd1GifgzzI31Ho1D8_UduSl0i6feMSyAfvg/exec';
+    const form = document.getElementById('incidentForm');
+    const dateInput = document.getElementById('dateInput');
+    const incidentSelect = document.getElementById('incidentSelect');
+    const descriptionInput = document.getElementById('descriptionInput');
+    const tableBody = document.querySelector('#incidentsTable tbody');
+    const summaryArea = document.getElementById('summaryArea');
 
+    function formatDate(iso) {
+      return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const newIncident = {
+        date: dateInput.value,
+        type: incidentSelect.value,
+        description: descriptionInput.value.trim()
+      };
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newIncident)
+      });
+      const row = document.createElement('tr');
+      row.innerHTML = `<td>${formatDate(newIncident.date)}</td><td>${newIncident.type}</td><td>${newIncident.description}</td>`;
+      tableBody.appendChild(row);
+      summaryArea.textContent = `Total kejadian: ${tableBody.rows.length}`;
+      form.reset();
+      dateInput.value = new Date().toISOString().split('T')[0];
+    });
+
+    dateInput.value = new Date().toISOString().split('T')[0];
+  </script>
+</body>
+</html>
